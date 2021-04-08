@@ -51,7 +51,7 @@ impl<'a> VM<'a> {
 		let r = running.clone();
 
 		ctrlc::set_handler(move || r.store(false, Ordering::SeqCst))
-			.or_else(|_| Err("Could not set Ctrl-C handler!".to_string()))?;
+			.map_err(|_| "Could not set Ctrl-C handler!".to_string())?;
 
 		while self.step(input, output)? && running.load(Ordering::SeqCst) {}
 
@@ -328,7 +328,7 @@ fn in_op<I: Read, O: Write>(
 			}
 		}
 		Ok(0) => {
-			return Ok(Action::Halt());
+			Ok(Action::Halt())
 		}
 		_ => Err("Could not read from input!".to_string()),
 	}
