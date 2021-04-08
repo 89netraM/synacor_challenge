@@ -92,9 +92,10 @@ fn decompile(args: &ArgMatches) -> Result<(), String> {
 }
 
 fn compile(args: &ArgMatches) -> Result<(), String> {
-	let file = fs::File::open(args.value_of(ARG_SOURCE).unwrap())
+	let source = fs::File::open(args.value_of(ARG_SOURCE).unwrap())
 		.map_err(|e| format!("Error when opening source file. {}", e))?;
-	let parsing = compiler::parse(file)?;
-	println!("{:#?}", parsing);
-	Ok(())
+	let parsing = compiler::parse(source)?;
+	let mut file = fs::File::create(args.value_of(PARAM_OUT).unwrap())
+		.map_err(|e| format!("Error when opening out file. {}", e))?;
+	compiler::compile(&parsing, &mut file)
 }

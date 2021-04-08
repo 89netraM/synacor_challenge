@@ -136,7 +136,7 @@ pub fn parse<I: Read>(input: I) -> Result<Parsing, String> {
 	})
 }
 
-fn get_size(instruction: &Instruction) -> u16 {
+pub(super) fn get_size(instruction: &Instruction) -> u16 {
 	match instruction {
 		Instruction::Halt() => 1,
 		Instruction::Set(_, _) => 3,
