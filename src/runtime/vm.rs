@@ -1,5 +1,9 @@
 use super::data::Data;
 use std::io::{Read, Write};
+use std::sync::{
+	atomic::{AtomicBool, Ordering},
+	Arc,
+};
 
 type Handler<I, O> = fn(&mut Data, usize, &mut I, &mut O) -> Result<Action, String>;
 
@@ -43,7 +47,14 @@ impl<'a> VM<'a> {
 	}
 
 	pub fn run<I: Read, O: Write>(&mut self, input: &mut I, output: &mut O) -> Result<(), String> {
-		while self.step(input, output)? {}
+		let running = Arc::new(AtomicBool::new(true));
+		let r = running.clone();
+
+		ctrlc::set_handler(move || r.store(false, Ordering::SeqCst))
+			.or_else(|_| Err("Could not set Ctrl-C handler!".to_string()))?;
+
+		while self.step(input, output)? && running.load(Ordering::SeqCst) {}
+
 		Ok(())
 	}
 }
@@ -315,6 +326,9 @@ fn in_op<I: Read, O: Write>(
 				data.set_number(i + 1, buf[0] as u16)?;
 				Ok(Action::Move(2))
 			}
+		}
+		Ok(0) => {
+			return Ok(Action::Halt());
 		}
 		_ => Err("Could not read from input!".to_string()),
 	}
