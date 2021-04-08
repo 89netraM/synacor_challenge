@@ -74,7 +74,7 @@ pub fn parse<I: Read>(input: I) -> Result<Parsing, String> {
 				break;
 			} else if part.ends_with(':') {
 				if label.is_none() {
-					let name = &part[0..part.len()];
+					let name = &part[0..part.len() - 1];
 					if let Ok(pointer_label) = name.parse::<u16>() {
 						if pointer_label != pointer {
 							return Err(format!(
@@ -115,7 +115,7 @@ pub fn parse<I: Read>(input: I) -> Result<Parsing, String> {
 
 		if let Some(con) = constructor {
 			let instruction = con(arguments)?;
-			pointer += get_size(&instruction);
+			let size = get_size(&instruction);
 			instructions.insert(
 				pointer,
 				ParsedInstruction {
@@ -123,6 +123,7 @@ pub fn parse<I: Read>(input: I) -> Result<Parsing, String> {
 					instruction,
 				},
 			);
+			pointer += size;
 		}
 
 		line_number += 1;
