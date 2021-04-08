@@ -31,6 +31,7 @@ pub(super) enum Instruction {
 	Out(Token),
 	In(Token),
 	Noop(),
+	Data(Token),
 }
 
 #[derive(Debug)]
@@ -45,7 +46,7 @@ pub struct Parsing {
 	pub(super) labels: HashMap<String, u16>,
 }
 
-type Constructor = fn([Option<Token>; 3]) -> Result<Instruction, String>;
+type Constructor = Box<dyn Fn([Option<Token>; 3]) -> Result<Instruction, String>>;
 
 pub fn parse<I: Read>(input: I) -> Result<Parsing, String> {
 	let mut reader = BufReader::new(input);
@@ -160,34 +161,47 @@ pub(super) fn get_size(instruction: &Instruction) -> u16 {
 		Instruction::Out(_) => 2,
 		Instruction::In(_) => 2,
 		Instruction::Noop() => 1,
+		Instruction::Data(_) => 1,
 	}
 }
 
 fn get_constructor(op: &str) -> Option<Constructor> {
 	match op {
-		"halt" => Some(halt),
-		"set" => Some(set),
-		"push" => Some(push),
-		"pop" => Some(pop),
-		"eq" => Some(eq),
-		"gt" => Some(gt),
-		"jmp" => Some(jmp),
-		"jt" => Some(jt),
-		"jf" => Some(jf),
-		"add" => Some(add),
-		"mult" => Some(mul),
-		"mod" => Some(mod_op),
-		"and" => Some(and),
-		"or" => Some(or),
-		"not" => Some(not),
-		"rmem" => Some(rmem),
-		"wmem" => Some(wmem),
-		"call" => Some(call),
-		"ret" => Some(ret),
-		"out" => Some(out),
-		"in" => Some(in_op),
-		"noop" => Some(noop),
-		_ => None,
+		"halt" => Some(Box::new(halt)),
+		"set" => Some(Box::new(set)),
+		"push" => Some(Box::new(push)),
+		"pop" => Some(Box::new(pop)),
+		"eq" => Some(Box::new(eq)),
+		"gt" => Some(Box::new(gt)),
+		"jmp" => Some(Box::new(jmp)),
+		"jt" => Some(Box::new(jt)),
+		"jf" => Some(Box::new(jf)),
+		"add" => Some(Box::new(add)),
+		"mult" => Some(Box::new(mul)),
+		"mod" => Some(Box::new(mod_op)),
+		"and" => Some(Box::new(and)),
+		"or" => Some(Box::new(or)),
+		"not" => Some(Box::new(not)),
+		"rmem" => Some(Box::new(rmem)),
+		"wmem" => Some(Box::new(wmem)),
+		"call" => Some(Box::new(call)),
+		"ret" => Some(Box::new(ret)),
+		"out" => Some(Box::new(out)),
+		"in" => Some(Box::new(in_op)),
+		"noop" => Some(Box::new(noop)),
+		_ => {
+			if let Ok(v) = op.parse() {
+				Some(Box::new(move |args: [Option<Token>; 3]| {
+					if [None, None, None] == args {
+						Ok(Instruction::Data(Token::Value(v)))
+					} else {
+						Err("Only one data point per line!".to_string())
+					}
+				}))
+			} else {
+				None
+			}
+		}
 	}
 }
 

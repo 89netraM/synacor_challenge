@@ -48,6 +48,7 @@ fn compile_instruction<O: Write>(
 		Instruction::Out(a1) => out(a1, output),
 		Instruction::In(a1) => in_op(a1, output),
 		Instruction::Noop() => noop(output),
+		Instruction::Data(a1) => data(a1, output),
 	}
 }
 
@@ -454,6 +455,15 @@ fn in_op<O: Write>(register: &Token, output: &mut O) -> Result<(), String> {
 
 fn noop<O: Write>(output: &mut O) -> Result<(), String> {
 	output.write_all(&[21, 0]).map_err(could_not_write)
+}
+
+fn data<O: Write>(value: &Token, output: &mut O) -> Result<(), String> {
+	if let Token::Value(t) = value {
+		let t_bytes = t.to_le_bytes();
+		output.write_all(&t_bytes).map_err(could_not_write)
+	} else {
+		Err("Data must be a literal.".to_string())
+	}
 }
 
 fn could_not_write(e: Error) -> String {
