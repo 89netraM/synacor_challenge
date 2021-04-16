@@ -350,3 +350,62 @@ fn unknown<I: Read, O: Write>(
 ) -> Result<Action, String> {
 	Err(format!("Unknown opcode {}!", data.get_number(i)?))
 }
+
+#[cfg(test)]
+mod tests {
+	use std::io::{empty, sink};
+
+	use super::{super::data::Data, *};
+
+	const MEMORY: &'static [u16] = &[21, 19, 77, 0];
+
+	fn create_vm() -> VM<'static> {
+		VM::new(Data::new(MEMORY))
+	}
+
+	#[test]
+	fn init_pointer() {
+		let vm = create_vm();
+		assert_eq!(vm.pointer, 0, "Pointer should start at zero.");
+	}
+
+	#[test]
+	fn one_step() {
+		let mut vm = create_vm();
+		let result = vm.step(&mut empty(), &mut sink());
+		assert_eq!(result, Ok(true), "Take one noop step.");
+	}
+
+	#[test]
+	fn final_step() {
+		let mut vm = create_vm();
+		vm.pointer = 3;
+		let result = vm.step(&mut empty(), &mut sink());
+		assert_eq!(result, Ok(false), "Take one halt step.");
+	}
+
+	#[test]
+	fn invalid_step() {
+		let mut vm = create_vm();
+		vm.pointer = 4;
+		let result = vm.step(&mut empty(), &mut sink());
+		assert_eq!(
+			result,
+			Err("Out of range 4!".to_string()),
+			"Take invalid step."
+		);
+	}
+
+	#[test]
+	fn run_to_completion() {
+		let mut vm = create_vm();
+		let mut output = Vec::new();
+		let result = vm.run(&mut empty(), &mut output);
+		assert_eq!(
+			result,
+			Ok(()),
+			"Run the small program to completion. (noop, out 77, halt)"
+		);
+		assert_eq!(String::from_utf8(output), Ok("M".to_string()));
+	}
+}
