@@ -1,5 +1,7 @@
-use std::collections::HashMap;
-use std::io::{BufRead, BufReader, Read};
+use std::{
+	collections::HashMap,
+	io::{BufRead, BufReader, Read},
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub(super) enum Token {
@@ -117,13 +119,10 @@ pub fn parse<I: Read>(input: I) -> Result<Parsing, String> {
 		if let Some(con) = constructor {
 			let instruction = con(arguments)?;
 			let size = get_size(&instruction);
-			instructions.insert(
-				pointer,
-				ParsedInstruction {
-					line_number,
-					instruction,
-				},
-			);
+			instructions.insert(pointer, ParsedInstruction {
+				line_number,
+				instruction,
+			});
 			pointer += size;
 		}
 

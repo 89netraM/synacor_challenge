@@ -1,9 +1,12 @@
-use super::data::Data;
-use std::io::{Read, Write};
-use std::sync::{
-	atomic::{AtomicBool, Ordering},
-	Arc,
+use std::{
+	io::{Read, Write},
+	sync::{
+		atomic::{AtomicBool, Ordering},
+		Arc,
+	},
 };
+
+use super::data::Data;
 
 type Handler<I, O> = fn(&mut Data, usize, &mut I, &mut O) -> Result<Action, String>;
 
@@ -21,7 +24,10 @@ pub struct VM<'a> {
 
 impl<'a> VM<'a> {
 	pub fn new(data: Data<'a>) -> Self {
-		Self { data, pointer: 0 }
+		Self {
+			data,
+			pointer: 0,
+		}
 	}
 
 	pub fn step<I: Read, O: Write>(
@@ -327,9 +333,7 @@ fn in_op<I: Read, O: Write>(
 				Ok(Action::Move(2))
 			}
 		}
-		Ok(0) => {
-			Ok(Action::Halt())
-		}
+		Ok(0) => Ok(Action::Halt()),
 		_ => Err("Could not read from input!".to_string()),
 	}
 }

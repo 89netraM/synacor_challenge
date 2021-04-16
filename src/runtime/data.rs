@@ -42,6 +42,7 @@ impl<'a> Data<'a> {
 	pub fn push_stack(&mut self, value: u16) {
 		self.stack.push(value);
 	}
+
 	pub fn pop_stack(&mut self) -> Result<u16, String> {
 		self.stack
 			.pop()
@@ -58,6 +59,7 @@ impl<'a> Data<'a> {
 			Err(format!("Reading from out of range address {}!", addr))
 		}
 	}
+
 	pub fn write_memory(&mut self, address: u16, value: u16) -> Result<(), String> {
 		let addr = address as usize;
 		if addr < self.memory.len() {
@@ -67,6 +69,7 @@ impl<'a> Data<'a> {
 			Err(format!("Writing to out of range address {}!", address))
 		}
 	}
+
 	pub fn length_memory(&self) -> usize {
 		self.memory.len()
 	}

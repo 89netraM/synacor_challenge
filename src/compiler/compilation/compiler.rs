@@ -1,6 +1,9 @@
+use std::{
+	collections::HashMap,
+	io::{Error, Write},
+};
+
 use super::parser::{get_size, Instruction, Parsing, Token};
-use std::collections::HashMap;
-use std::io::{Error, Write};
 
 pub fn compile<O: Write>(parsing: &Parsing, output: &mut O) -> Result<(), String> {
 	let mut pointer = 0;

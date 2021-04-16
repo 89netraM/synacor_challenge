@@ -1,10 +1,10 @@
 mod compiler;
 mod runtime;
 
+use std::{fs, io};
+
 use clap::{App, AppSettings, Arg, ArgMatches, SubCommand};
 use runtime::{data::Data, vm::VM};
-use std::fs;
-use std::io;
 
 const COMMAND_EXECUTE: &str = "execute";
 const COMMAND_DECOMPILE: &str = "decompile";
@@ -29,9 +29,9 @@ fn main() {
 						.short("o")
 						.takes_value(true)
 						.help(
-							"A path where to write the output, any existing \
-							file will be overwritten. If not specified, the \
-							output will be written to the terminal.",
+							"A path where to write the output, any existing file will be \
+							 overwritten. If not specified, the output will be written to the \
+							 terminal.",
 						),
 				),
 		)
