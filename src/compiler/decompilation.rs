@@ -24,7 +24,7 @@ fn get_handler<O: Write>(opcode: u16) -> Handler<O> {
 		7 => jt,
 		8 => jf,
 		9 => add,
-		10 => mul,
+		10 => mult,
 		11 => mod_op,
 		12 => and,
 		13 => or,
@@ -129,10 +129,10 @@ fn add<O: Write>(memory: &[u16], pointer: usize, out: &mut O) -> io::Result<usiz
 	Ok(4)
 }
 
-fn mul<O: Write>(memory: &[u16], pointer: usize, out: &mut O) -> io::Result<usize> {
+fn mult<O: Write>(memory: &[u16], pointer: usize, out: &mut O) -> io::Result<usize> {
 	writeln!(
 		out,
-		"{}:\tmul\t{}\t{}\t{}",
+		"{}:\tmult\t{}\t{}\t{}",
 		pointer,
 		memory[pointer + 1],
 		memory[pointer + 2],

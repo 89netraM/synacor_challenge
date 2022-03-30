@@ -39,7 +39,7 @@ fn compile_instruction<O: Write>(
 		Instruction::Jt(a1, a2) => jt(a1, a2, labels, output),
 		Instruction::Jf(a1, a2) => jf(a1, a2, labels, output),
 		Instruction::Add(a1, a2, a3) => add(a1, a2, a3, output),
-		Instruction::Mul(a1, a2, a3) => mul(a1, a2, a3, output),
+		Instruction::Mult(a1, a2, a3) => mult(a1, a2, a3, output),
 		Instruction::Mod(a1, a2, a3) => mod_op(a1, a2, a3, output),
 		Instruction::And(a1, a2, a3) => and(a1, a2, a3, output),
 		Instruction::Or(a1, a2, a3) => or(a1, a2, a3, output),
@@ -241,7 +241,7 @@ fn add<O: Write>(
 	}
 }
 
-fn mul<O: Write>(
+fn mult<O: Write>(
 	register: &Token,
 	value_a: &Token,
 	value_b: &Token,

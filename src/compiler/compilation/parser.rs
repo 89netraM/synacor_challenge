@@ -21,7 +21,7 @@ pub(super) enum Instruction {
 	Jt(Token, Token),
 	Jf(Token, Token),
 	Add(Token, Token, Token),
-	Mul(Token, Token, Token),
+	Mult(Token, Token, Token),
 	Mod(Token, Token, Token),
 	And(Token, Token, Token),
 	Or(Token, Token, Token),
@@ -148,7 +148,7 @@ pub(super) fn get_size(instruction: &Instruction) -> u16 {
 		Instruction::Jt(_, _) => 3,
 		Instruction::Jf(_, _) => 3,
 		Instruction::Add(_, _, _) => 4,
-		Instruction::Mul(_, _, _) => 4,
+		Instruction::Mult(_, _, _) => 4,
 		Instruction::Mod(_, _, _) => 4,
 		Instruction::And(_, _, _) => 4,
 		Instruction::Or(_, _, _) => 4,
@@ -176,7 +176,7 @@ fn get_constructor(op: &str) -> Option<Constructor> {
 		"jt" => Some(Box::new(jt)),
 		"jf" => Some(Box::new(jf)),
 		"add" => Some(Box::new(add)),
-		"mult" => Some(Box::new(mul)),
+		"mult" => Some(Box::new(mult)),
 		"mod" => Some(Box::new(mod_op)),
 		"and" => Some(Box::new(and)),
 		"or" => Some(Box::new(or)),
@@ -284,11 +284,11 @@ fn add(args: [Option<Token>; 3]) -> Result<Instruction, String> {
 	}
 }
 
-fn mul(args: [Option<Token>; 3]) -> Result<Instruction, String> {
+fn mult(args: [Option<Token>; 3]) -> Result<Instruction, String> {
 	if let [Some(a1), Some(a2), Some(a3)] = args {
-		Ok(Instruction::Mul(a1, a2, a3))
+		Ok(Instruction::Mult(a1, a2, a3))
 	} else {
-		Err("mul takes three arguments".to_string())
+		Err("mult takes three arguments".to_string())
 	}
 }
 
