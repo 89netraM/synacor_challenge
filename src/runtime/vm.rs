@@ -6,6 +6,8 @@ use std::{
 	},
 };
 
+use serde::{Deserialize, Serialize};
+
 use super::data::Data;
 
 type Handler<I, O> = fn(&mut Data, usize, &mut I, &mut O) -> Result<Action, String>;
@@ -16,7 +18,7 @@ enum Action {
 	Halt(),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize, Serialize)]
 pub struct VM<'a> {
 	pub data: Data<'a>,
 	pub pointer: usize,
@@ -28,6 +30,17 @@ impl<'a> VM<'a> {
 			data,
 			pointer: 0,
 		}
+	}
+
+	pub fn save(&self) -> Result<Vec<u8>, String> {
+		bincode::serialize(self).map_err(|e| format!("Could not format save file. {}", e))
+	}
+
+	pub fn load(memory: &'a [u16], save: &[u8]) -> Result<Self, String> {
+		let mut vm: Self =
+			bincode::deserialize(save).map_err(|e| format!("Could not read save file. {}", e))?;
+		vm.data.memory = memory;
+		Ok(vm)
 	}
 
 	pub fn step<I: Read, O: Write>(

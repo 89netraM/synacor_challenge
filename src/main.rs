@@ -1,7 +1,10 @@
 mod compiler;
 mod runtime;
 
-use std::{fs, io};
+use std::{
+	fs,
+	io::{self, BufRead, Write},
+};
 
 use clap::{App, AppSettings, Arg, ArgMatches, SubCommand};
 use runtime::{data::Data, vm::VM};
@@ -11,6 +14,7 @@ const COMMAND_DECOMPILE: &str = "decompile";
 const COMMAND_COMPILE: &str = "compile";
 const ARG_BINARY: &str = "binary";
 const ARG_SOURCE: &str = "source";
+const ARG_LOAD: &str = "load";
 const PARAM_OUT: &str = "out";
 
 fn main() {
@@ -18,7 +22,17 @@ fn main() {
 		.required(true)
 		.help("A path to the binary you wish to operate on.");
 	let matches = App::new("Synacor Challenge Runtime")
-		.subcommand(SubCommand::with_name(COMMAND_EXECUTE).arg(binary_arg.clone()))
+		.subcommand(
+			SubCommand::with_name(COMMAND_EXECUTE)
+				.arg(binary_arg.clone())
+				.arg(
+					Arg::with_name(ARG_LOAD)
+						.long("load")
+						.short("l")
+						.takes_value(true)
+						.help("Start from this save file."),
+				),
+		)
 		.subcommand(
 			SubCommand::with_name(COMMAND_DECOMPILE)
 				.about("Writes the binary in human readable text.")
@@ -74,10 +88,32 @@ fn load_binary(args: &ArgMatches) -> Result<Vec<u16>, String> {
 
 fn execute(args: &ArgMatches) -> Result<(), String> {
 	let memory = load_binary(args)?;
-	let data = Data::new(&memory);
-	let mut vm = VM::new(data);
+	let mut vm = if let Some(load_path) = args.value_of(ARG_LOAD) {
+		fs::read(load_path)
+			.map(|f| VM::load(&memory, &f))
+			.map_err(|e| format!("Error when loading save file. {}", e))??
+	} else {
+		VM::new(Data::new(&memory))
+	};
 
-	vm.run(&mut io::stdin(), &mut io::stdout())
+	vm.run(&mut io::stdin(), &mut io::stdout())?;
+
+	print!("Save state to file (leave blank to discard): ");
+	io::stdout()
+		.flush()
+		.map_err(|e| format!("Could not read line. {}", e))?;
+	if let Some(save_path) = io::stdin()
+		.lock()
+		.lines()
+		.next()
+		.transpose()
+		.map_err(|e| format!("Could not read line. {}", e))?
+		.filter(|l| l.len() > 0)
+	{
+		fs::write(save_path, vm.save()?).map_err(|e| format!("Error when saving state. {}", e))?;
+	}
+
+	Ok(())
 }
 
 fn decompile(args: &ArgMatches) -> Result<(), String> {

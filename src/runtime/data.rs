@@ -1,8 +1,11 @@
 use std::collections::HashMap;
 
-#[derive(Clone)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Deserialize, Serialize)]
 pub struct Data<'a> {
-	memory: &'a [u16],
+	#[serde(skip)]
+	pub(super) memory: &'a [u16],
 	memory_changes: HashMap<usize, u16>,
 	registers: [u16; 8],
 	stack: Vec<u16>,
