@@ -1,2 +1,7 @@
+.vscode/
 bin/
 obj/
+
+challenge.bin
+program.exe
+program.runtimeconfig.json
