@@ -22,15 +22,16 @@ public static partial class Assembler
 				MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Private.CoreLib")).Location),
 				MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location),
 				MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Console")).Location),
+				MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Collections")).Location),
 			},
 			new CSharpCompilationOptions(
-				outputKind: OutputKind.ConsoleApplication,
 #if DEBUG
 				optimizationLevel: OptimizationLevel.Debug,
 #else
 				optimizationLevel: OptimizationLevel.Release,
 #endif
-				checkOverflow: true));
+				outputKind: OutputKind.ConsoleApplication
+			));
 
 		var emitResult = compilation.Emit(outputPath);
 
@@ -44,7 +45,6 @@ public static partial class Assembler
 					Console.Error.WriteLine($"\t{error.GetMessage()}");
 				}
 			}
-			Console.Error.WriteLine($"C# code:\n{code}");
 		}
 	}
 }

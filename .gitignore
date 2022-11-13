@@ -3,5 +3,6 @@ bin/
 obj/
 
 challenge.bin
+memory.bin
 program.exe
 program.runtimeconfig.json
